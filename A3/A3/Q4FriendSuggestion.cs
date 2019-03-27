@@ -8,50 +8,68 @@ using A2;
 
 namespace A3
 {
-    public class Q4FriendSuggestion:Processor
+    public class Q4FriendSuggestion : Processor
     {
-        public Q4FriendSuggestion(string testDataName) : base(testDataName) { }
+        public Q4FriendSuggestion(string testDataName) : base(testDataName)
+        {
+            //this.ExcludeTestCaseRangeInclusive(1, 36);
+            this.ExcludeTestCaseRangeInclusive(36, 50);
+        }
 
         public override string Process(string inStr) =>
-            TestTools.Process(inStr, (Func<long, long, long[][], long,long[][], long[]>)Solve);
+            TestTools.Process(inStr, (Func<long, long, long[][], long, long[][], long[]>)Solve);
 
-        public long[] Solve(long NodeCount, long EdgeCount, 
-                              long[][] edges, long QueriesCount, 
-                              long[][]Queries)
+        public long[] Solve(long NodeCount, long EdgeCount,
+                              long[][] edges, long QueriesCount,
+                              long[][] Queries)
         {
             var result = new List<long>((int)QueriesCount);
+            var nodes = new Node[NodeCount];
+            var reversedNodes = new Node[NodeCount];
+
+            var nodesClone = new Node[NodeCount];
+            var reversedNodesClone = new Node[NodeCount];
+
+            for (int i = 0; i < NodeCount; i++)
+            {
+                nodes[i] = new Node(i + 1, int.MaxValue, null);
+                reversedNodes[i] = new Node(i + 1, int.MaxValue, null);
+                nodesClone[i] = new Node(i + 1, int.MaxValue, null);
+                reversedNodesClone[i] = new Node(i + 1, int.MaxValue, null);
+            }
+
+
+            var graph = MakeGraph(NodeCount, nodes, edges, false);
+            var reversedGraph = MakeGraph(NodeCount,
+                reversedNodes, edges, true);
 
             foreach (var query in Queries)
             {
                 var startNode = query[0];
                 var targetNode = query[1];
 
-                result.Add(BidirectionalDijkstra(startNode, targetNode,
+                for (int i = 0; i < NodeCount; i++)
+                {
+                    nodes[i].Distance = int.MaxValue;
+                    reversedNodes[i].Distance = int.MaxValue;
+                }
+
+                result.Add(BidirectionalDijkstra(nodes, reversedNodes, graph, reversedGraph, startNode, targetNode,
                     edges, NodeCount, EdgeCount));
             }
+
 
             return result.ToArray();
         }
 
-        private long BidirectionalDijkstra(long startNode, long targetNode,
+        private long BidirectionalDijkstra(Node[] nodes, Node[] reversedNodes,
+            Dictionary<long, List<(Node, long)>> graph,
+            Dictionary<long, List<(Node, long)>> reversedGraph,
+            long startNode, long targetNode,
             long[][] edges, long NodeCount, long EdgeCount)
         {
             if (startNode == targetNode)
                 return 0;
-
-            var nodes = new Node[NodeCount];
-            var reversedNodes = new Node[NodeCount];
-
-            for (int i = 0; i < NodeCount; i++)
-            {
-                nodes[i] = new Node(i + 1, int.MaxValue, null);
-                reversedNodes[i] = new Node(i + 1, int.MaxValue, null);
-            }
-            
-            //var reversedEdges = ReverseEdges(edges, EdgeCount);
-            var graph = MakeGraph(NodeCount, nodes, edges, false);
-            var reversedGraph = MakeGraph(NodeCount,
-                reversedNodes, edges, true);
 
             nodes[startNode - 1].Distance = 0;
             reversedNodes[targetNode - 1].Distance = 0;
@@ -102,9 +120,8 @@ namespace A3
             if (sinkNode.Distance > startNode.Distance + weight)
             {
                 sinkNode.Prev = startNode;
-                if (nodesQ.MinHeap.Contains(sinkNode))
-                    nodesQ.ChangePriority(Array.IndexOf(nodesQ.MinHeap, sinkNode),
-                                    (int)startNode.Distance + (int)weight);
+                nodesQ.ChangePriority(Array.IndexOf(nodesQ.MinHeap, sinkNode),
+                                (int)startNode.Distance + (int)weight);
             }
         }
 
@@ -116,7 +133,7 @@ namespace A3
             long distance = int.MaxValue;
             long best = -1;
             foreach (var nodeData in processedNodes.Concat(reverseProcessedNodes))
-            {   
+            {
                 var directNode = nodes[nodeData - 1];
                 var reverseNode = reversedNodes[nodeData - 1];
                 if (directNode.Distance + reverseNode.Distance < distance)
@@ -158,13 +175,5 @@ namespace A3
             return nodeConnections;
         }
 
-
-        //private static long[][] ReverseEdges(long[][] edges, long edgeCount)
-        //{
-        //    var reversedEdges = new long[edgeCount][];
-        //    for (int i = 0; i < edgeCount; i++)
-        //        reversedEdges[i] = new long[] { edges[i][1], edges[i][0], edges[i][2] };
-        //    return reversedEdges;
-        //}
     }
 }

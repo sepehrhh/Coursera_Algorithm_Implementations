@@ -11,7 +11,7 @@ namespace A2
         public Node Prev { get; set; }
         public long Distance { get; set; }
         public long Data { get; set; }
-        public Nullable<bool> Color { get; set; }
+        public bool Relaxed { get; set; }
 
         public Node(long data, long dist)
         {
