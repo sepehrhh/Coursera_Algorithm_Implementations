@@ -12,7 +12,7 @@ namespace A3.Tests
     [TestClass()]
     public class GradedTests
     {
-        [TestMethod(), Timeout(20000)]
+        [TestMethod()/*, Timeout(20000)*/]
         [DeploymentItem("TestData", "A3_TestData")]
         public void SolveTest()
         {
@@ -25,7 +25,7 @@ namespace A3.Tests
 
             foreach (var p in problems)
             {
-                TestTools.RunLocalTest("A3", p.Process, p.TestDataName,p.Verifier);
+                TestTools.RunLocalTest("A3", p.Process, p.TestDataName, p.Verifier, false, p.ExcludedTestCases);
             }
         }
     }
