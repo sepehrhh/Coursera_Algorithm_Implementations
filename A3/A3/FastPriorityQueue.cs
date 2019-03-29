@@ -13,6 +13,7 @@ namespace A3
         public int MaxSize { get; }
         public int Size { get { return Queue.Count; } }
         public bool[] IsInQueue { get; set; }
+        
 
         public FastPriorityQueue(int maxSize)
         {
@@ -27,6 +28,10 @@ namespace A3
                 throw new Exception("ERROR");
             Queue.Add(node);
             IsInQueue[node.Data - 1] = true;
+            if (!node.ReverseMode)
+                node.QueueIndex = Size - 1;
+            else
+                node.ReversedQueueIndex = Size - 1;
             SiftUp(Size - 1);
         }
 
@@ -38,11 +43,22 @@ namespace A3
 
         public void SiftUp(int i)
         {
-            while (i > 0 && Queue[Parent(i)].Distance > Queue[i].Distance)
+            while (i > 0 && Queue[Parent(i)].Distance >= Queue[i].Distance)
             {
+                if (!Queue[i].ReverseMode)
+                {
+                    Queue[i].QueueIndex = Parent(i);
+                    Queue[Parent(i)].QueueIndex = i;
+                }
+                else
+                {
+                    Queue[i].ReversedQueueIndex = Parent(i);
+                    Queue[Parent(i)].ReversedQueueIndex = i;
+                }
                 (Queue[i], Queue[Parent(i)]) =
                     (Queue[Parent(i)], Queue[i]);
                 i = Parent(i);
+
             }
         }
 
@@ -57,6 +73,16 @@ namespace A3
                 maxIndex = r;
             if (i != maxIndex)
             {
+                if (!Queue[i].ReverseMode)
+                {
+                    Queue[i].QueueIndex = Parent(i);
+                    Queue[maxIndex].QueueIndex = i;
+                }
+                else
+                {
+                    Queue[i].ReversedQueueIndex = Parent(i);
+                    Queue[maxIndex].ReversedQueueIndex = i;
+                }
                 (Queue[i], Queue[maxIndex]) =
                     (Queue[maxIndex], Queue[i]);
                 SiftDown(maxIndex);

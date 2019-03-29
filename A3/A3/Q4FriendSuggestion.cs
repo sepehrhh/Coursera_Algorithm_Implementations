@@ -58,14 +58,14 @@ namespace A3
             }
 
 
-            var expected = File.ReadAllLines(@"C:\git\AD97982\A3\A3Tests\TestData\TD4\Out_15.txt");
-            var writer = new StreamWriter(@"C:\git\AD97982\A3\A3Tests\TestData\ResultDifferences.txt");
-            using (writer)
-            {
-                for (int i = 0; i < QueriesCount; i++)
-                    if (long.Parse(expected[i]) != result[i])
-                        writer.WriteLine($"{i} - expected: {expected[i]} - actual: {result[i]}");
-            }
+            //var expected = File.ReadAllLines(@"C:\git\AD97982\A3\A3Tests\TestData\TD4\Out_15.txt");
+            //var writer = new StreamWriter(@"C:\git\AD97982\A3\A3Tests\TestData\ResultDifferences.txt");
+            //using (writer)
+            //{
+            //    for (int i = 0; i < QueriesCount; i++)
+            //        if (long.Parse(expected[i]) != result[i])
+            //            writer.WriteLine($"{i} - expected: {expected[i]} - actual: {result[i]}");
+            //}
 
             return result.ToArray();
         }
@@ -88,6 +88,9 @@ namespace A3
             var nodesQ = new FastPriorityQueue((int)NodeCount);
             var reversedNodesQ = new FastPriorityQueue((int)NodeCount);
 
+            nodes[startNode - 1].ReverseMode = false;
+            reversedNodes[targetNode - 1].ReverseMode = true;
+
             nodesQ.Enqueue(nodes[startNode - 1]);
             reversedNodesQ.Enqueue(reversedNodes[targetNode - 1]);
 
@@ -97,7 +100,7 @@ namespace A3
             do
             {
                 var currentNode = nodesQ.ExtractPeek();
-                ProcessNode(currentNode, graph, nodes, processedNodes, nodesQ);
+                ProcessNode(currentNode, graph, nodes, processedNodes, nodesQ, false);
 
                 if (reversedNodesProcessed.Contains(currentNode.Data))
                     return currentNode.Distance != int.MaxValue ? ShortestPath(startNode, targetNode, nodes,
@@ -105,8 +108,9 @@ namespace A3
 
                 var currentReverseNode = reversedNodesQ.ExtractPeek();
 
+                currentNode.ReverseMode = true;
                 ProcessNode(currentReverseNode, reversedGraph, reversedNodes,
-                    reversedNodesProcessed, reversedNodesQ);
+                    reversedNodesProcessed, reversedNodesQ, true);
                 
                 if (processedNodes.Contains(currentReverseNode.Data))
                     return currentNode.Distance != int.MaxValue ? ShortestPath(startNode, targetNode, nodes,
@@ -120,10 +124,13 @@ namespace A3
 
         private void ProcessNode(Node currentNode,
             Dictionary<long, List<(Node, long)>> graph,
-            Node[] nodes, List<long> processed, FastPriorityQueue nodesQ)
+            Node[] nodes, List<long> processed, FastPriorityQueue nodesQ, bool mode)
         {
             foreach (var edge in graph[currentNode.Data])
+            {
+                edge.Item1.ReverseMode = mode;
                 Relax(currentNode, edge.Item1, edge.Item2, nodesQ);
+            }
             processed.Add(currentNode.Data);
         }
 
@@ -134,8 +141,20 @@ namespace A3
             {
                 sinkNode.Prev = startNode;
                 if (nodesQ.IsInQueue[sinkNode.Data - 1])
-                    nodesQ.ChangePriority(nodesQ.Queue.IndexOf(sinkNode),
+                {
+                    if (!sinkNode.ReverseMode)
+                    {
+                        if (sinkNode.QueueIndex != null)
+                            nodesQ.ChangePriority((int)sinkNode.QueueIndex,
+                                        (int)startNode.Distance + (int)weight);
+                    }
+                    else
+                    {
+                        if (sinkNode.ReversedQueueIndex != null)
+                            nodesQ.ChangePriority((int)sinkNode.ReversedQueueIndex,
                                     (int)startNode.Distance + (int)weight);
+                    }
+                }
                 else
                 {
                     sinkNode.Distance = startNode.Distance + weight;
