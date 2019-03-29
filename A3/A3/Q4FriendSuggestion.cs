@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 using TestCommon;
 using A2;
 
@@ -12,8 +13,8 @@ namespace A3
     {
         public Q4FriendSuggestion(string testDataName) : base(testDataName)
         {
-            //this.ExcludeTestCaseRangeInclusive(1, 36);
-            this.ExcludeTestCaseRangeInclusive(36, 50);
+            this.ExcludeTestCaseRangeInclusive(1, 14);
+            this.ExcludeTestCaseRangeInclusive(16, 50);
         }
 
         public override string Process(string inStr) =>
@@ -34,8 +35,6 @@ namespace A3
             {
                 nodes[i] = new Node(i + 1, int.MaxValue, null);
                 reversedNodes[i] = new Node(i + 1, int.MaxValue, null);
-                nodesClone[i] = new Node(i + 1, int.MaxValue, null);
-                reversedNodesClone[i] = new Node(i + 1, int.MaxValue, null);
             }
 
 
@@ -59,6 +58,15 @@ namespace A3
             }
 
 
+            var expected = File.ReadAllLines(@"C:\git\AD97982\A3\A3Tests\TestData\TD4\Out_15.txt");
+            var writer = new StreamWriter(@"C:\git\AD97982\A3\A3Tests\TestData\ResultDifferences.txt");
+            using (writer)
+            {
+                for (int i = 0; i < QueriesCount; i++)
+                    if (long.Parse(expected[i]) != result[i])
+                        writer.WriteLine($"{i} - expected: {expected[i]} - actual: {result[i]}");
+            }
+
             return result.ToArray();
         }
 
@@ -71,43 +79,48 @@ namespace A3
             if (startNode == targetNode)
                 return 0;
 
+            if (graph[startNode].Count == 0 || reversedGraph[targetNode].Count == 0)
+                return -1;
+
             nodes[startNode - 1].Distance = 0;
             reversedNodes[targetNode - 1].Distance = 0;
 
-            var nodesQ = new PriorityQueue((int)NodeCount, nodes);
-            var reversedNodesQ = new PriorityQueue((int)NodeCount, reversedNodes);
+            var nodesQ = new FastPriorityQueue((int)NodeCount);
+            var reversedNodesQ = new FastPriorityQueue((int)NodeCount);
+
+            nodesQ.Enqueue(nodes[startNode - 1]);
+            reversedNodesQ.Enqueue(reversedNodes[targetNode - 1]);
 
             var processedNodes = new List<long>();
             var reversedNodesProcessed = new List<long>();
 
-            if (reversedGraph[targetNode].Count == 0)
-                return -1;
-
             do
             {
-                var currentNode = nodesQ.ExtractMin();
+                var currentNode = nodesQ.ExtractPeek();
                 ProcessNode(currentNode, graph, nodes, processedNodes, nodesQ);
 
                 if (reversedNodesProcessed.Contains(currentNode.Data))
                     return currentNode.Distance != int.MaxValue ? ShortestPath(startNode, targetNode, nodes,
                         reversedNodes, processedNodes, reversedNodesProcessed) : -1;
 
-                var currentReverseNode = reversedNodesQ.ExtractMin();
+                var currentReverseNode = reversedNodesQ.ExtractPeek();
 
                 ProcessNode(currentReverseNode, reversedGraph, reversedNodes,
                     reversedNodesProcessed, reversedNodesQ);
-
+                
                 if (processedNodes.Contains(currentReverseNode.Data))
                     return currentNode.Distance != int.MaxValue ? ShortestPath(startNode, targetNode, nodes,
                         reversedNodes, processedNodes, reversedNodesProcessed) : -1;
 
-            } while (true);
+            } while (nodesQ.Size > 0 && reversedNodesQ.Size > 0);
+
+            return -1;
         }
 
 
         private void ProcessNode(Node currentNode,
             Dictionary<long, List<(Node, long)>> graph,
-            Node[] nodes, List<long> processed, PriorityQueue nodesQ)
+            Node[] nodes, List<long> processed, FastPriorityQueue nodesQ)
         {
             foreach (var edge in graph[currentNode.Data])
                 Relax(currentNode, edge.Item1, edge.Item2, nodesQ);
@@ -115,13 +128,19 @@ namespace A3
         }
 
 
-        private void Relax(Node startNode, Node sinkNode, long weight, PriorityQueue nodesQ)
+        private void Relax(Node startNode, Node sinkNode, long weight, FastPriorityQueue nodesQ)
         {
             if (sinkNode.Distance > startNode.Distance + weight)
             {
                 sinkNode.Prev = startNode;
-                nodesQ.ChangePriority(Array.IndexOf(nodesQ.MinHeap, sinkNode),
-                                (int)startNode.Distance + (int)weight);
+                if (nodesQ.IsInQueue[sinkNode.Data - 1])
+                    nodesQ.ChangePriority(nodesQ.Queue.IndexOf(sinkNode),
+                                    (int)startNode.Distance + (int)weight);
+                else
+                {
+                    sinkNode.Distance = startNode.Distance + weight;
+                    nodesQ.Enqueue(sinkNode);
+                }
             }
         }
 
