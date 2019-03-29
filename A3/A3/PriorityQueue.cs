@@ -9,8 +9,8 @@ namespace A2
     class PriorityQueue
     {
         public Node[] MinHeap { get; set; }
-        public int MaxSize { get; set; }
-        public int Size { get; set; }
+        public int MaxSize { get; }
+        public int Size { get; set;  }
 
         public PriorityQueue(int maxSize, Node[] keys)
         {
@@ -21,7 +21,7 @@ namespace A2
                 Insert(keys[i]);
         }
 
-        public void Insert(Node node)
+        private void Insert(Node node)
         {
             if (Size == MaxSize)
                 throw new Exception("ERROR");

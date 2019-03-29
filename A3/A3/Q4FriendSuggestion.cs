@@ -3,108 +3,163 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 using TestCommon;
 using A2;
 
 namespace A3
 {
-    public class Q4FriendSuggestion:Processor
+    public class Q4FriendSuggestion : Processor
     {
-        public Q4FriendSuggestion(string testDataName) : base(testDataName) { }
-
-        public override string Process(string inStr) =>
-            TestTools.Process(inStr, (Func<long, long, long[][], long,long[][], long[]>)Solve);
-
-        public long[] Solve(long NodeCount, long EdgeCount, 
-                              long[][] edges, long QueriesCount, 
-                              long[][]Queries)
+        public Q4FriendSuggestion(string testDataName) : base(testDataName)
         {
-            var result = new List<long>((int)QueriesCount);
-
-            foreach (var query in Queries)
-            {
-                var startNode = query[0];
-                var targetNode = query[1];
-
-                result.Add(BidirectionalDijkstra(startNode, targetNode,
-                    edges, NodeCount, EdgeCount));
-            }
-
-            return result.ToArray();
+            this.ExcludeTestCaseRangeInclusive(1, 14);
+            this.ExcludeTestCaseRangeInclusive(16, 50);
         }
 
-        private long BidirectionalDijkstra(long startNode, long targetNode,
-            long[][] edges, long NodeCount, long EdgeCount)
-        {
-            if (startNode == targetNode)
-                return 0;
+        public override string Process(string inStr) =>
+            TestTools.Process(inStr, (Func<long, long, long[][], long, long[][], long[]>)Solve);
 
+        public long[] Solve(long NodeCount, long EdgeCount,
+                              long[][] edges, long QueriesCount,
+                              long[][] Queries)
+        {
+            var result = new List<long>((int)QueriesCount);
             var nodes = new Node[NodeCount];
             var reversedNodes = new Node[NodeCount];
+
+            var nodesClone = new Node[NodeCount];
+            var reversedNodesClone = new Node[NodeCount];
 
             for (int i = 0; i < NodeCount; i++)
             {
                 nodes[i] = new Node(i + 1, int.MaxValue, null);
                 reversedNodes[i] = new Node(i + 1, int.MaxValue, null);
             }
-            
-            //var reversedEdges = ReverseEdges(edges, EdgeCount);
+
+
             var graph = MakeGraph(NodeCount, nodes, edges, false);
             var reversedGraph = MakeGraph(NodeCount,
                 reversedNodes, edges, true);
 
+            foreach (var query in Queries)
+            {
+                var startNode = query[0];
+                var targetNode = query[1];
+
+                for (int i = 0; i < NodeCount; i++)
+                {
+                    nodes[i].Distance = int.MaxValue;
+                    reversedNodes[i].Distance = int.MaxValue;
+                }
+
+                result.Add(BidirectionalDijkstra(nodes, reversedNodes, graph, reversedGraph, startNode, targetNode,
+                    edges, NodeCount, EdgeCount));
+            }
+
+
+            //var expected = File.ReadAllLines(@"C:\git\AD97982\A3\A3Tests\TestData\TD4\Out_15.txt");
+            //var writer = new StreamWriter(@"C:\git\AD97982\A3\A3Tests\TestData\ResultDifferences.txt");
+            //using (writer)
+            //{
+            //    for (int i = 0; i < QueriesCount; i++)
+            //        if (long.Parse(expected[i]) != result[i])
+            //            writer.WriteLine($"{i} - expected: {expected[i]} - actual: {result[i]}");
+            //}
+
+            return result.ToArray();
+        }
+
+        private long BidirectionalDijkstra(Node[] nodes, Node[] reversedNodes,
+            Dictionary<long, List<(Node, long)>> graph,
+            Dictionary<long, List<(Node, long)>> reversedGraph,
+            long startNode, long targetNode,
+            long[][] edges, long NodeCount, long EdgeCount)
+        {
+            if (startNode == targetNode)
+                return 0;
+
+            if (graph[startNode].Count == 0 || reversedGraph[targetNode].Count == 0)
+                return -1;
+
             nodes[startNode - 1].Distance = 0;
             reversedNodes[targetNode - 1].Distance = 0;
 
-            var nodesQ = new PriorityQueue((int)NodeCount, nodes);
-            var reversedNodesQ = new PriorityQueue((int)NodeCount, reversedNodes);
+            var nodesQ = new FastPriorityQueue((int)NodeCount);
+            var reversedNodesQ = new FastPriorityQueue((int)NodeCount);
+
+            nodes[startNode - 1].ReverseMode = false;
+            reversedNodes[targetNode - 1].ReverseMode = true;
+
+            nodesQ.Enqueue(nodes[startNode - 1]);
+            reversedNodesQ.Enqueue(reversedNodes[targetNode - 1]);
 
             var processedNodes = new List<long>();
             var reversedNodesProcessed = new List<long>();
 
-            if (reversedGraph[targetNode].Count == 0)
-                return -1;
-
             do
             {
-                var currentNode = nodesQ.ExtractMin();
-                ProcessNode(currentNode, graph, nodes, processedNodes, nodesQ);
+                var currentNode = nodesQ.ExtractPeek();
+                ProcessNode(currentNode, graph, nodes, processedNodes, nodesQ, false);
 
                 if (reversedNodesProcessed.Contains(currentNode.Data))
                     return currentNode.Distance != int.MaxValue ? ShortestPath(startNode, targetNode, nodes,
                         reversedNodes, processedNodes, reversedNodesProcessed) : -1;
 
-                var currentReverseNode = reversedNodesQ.ExtractMin();
+                var currentReverseNode = reversedNodesQ.ExtractPeek();
 
+                currentNode.ReverseMode = true;
                 ProcessNode(currentReverseNode, reversedGraph, reversedNodes,
-                    reversedNodesProcessed, reversedNodesQ);
-
+                    reversedNodesProcessed, reversedNodesQ, true);
+                
                 if (processedNodes.Contains(currentReverseNode.Data))
                     return currentNode.Distance != int.MaxValue ? ShortestPath(startNode, targetNode, nodes,
                         reversedNodes, processedNodes, reversedNodesProcessed) : -1;
 
-            } while (true);
+            } while (nodesQ.Size > 0 && reversedNodesQ.Size > 0);
+
+            return -1;
         }
 
 
         private void ProcessNode(Node currentNode,
             Dictionary<long, List<(Node, long)>> graph,
-            Node[] nodes, List<long> processed, PriorityQueue nodesQ)
+            Node[] nodes, List<long> processed, FastPriorityQueue nodesQ, bool mode)
         {
             foreach (var edge in graph[currentNode.Data])
+            {
+                edge.Item1.ReverseMode = mode;
                 Relax(currentNode, edge.Item1, edge.Item2, nodesQ);
+            }
             processed.Add(currentNode.Data);
         }
 
 
-        private void Relax(Node startNode, Node sinkNode, long weight, PriorityQueue nodesQ)
+        private void Relax(Node startNode, Node sinkNode, long weight, FastPriorityQueue nodesQ)
         {
             if (sinkNode.Distance > startNode.Distance + weight)
             {
                 sinkNode.Prev = startNode;
-                if (nodesQ.MinHeap.Contains(sinkNode))
-                    nodesQ.ChangePriority(Array.IndexOf(nodesQ.MinHeap, sinkNode),
+                if (nodesQ.IsInQueue[sinkNode.Data - 1])
+                {
+                    if (!sinkNode.ReverseMode)
+                    {
+                        if (sinkNode.QueueIndex != null)
+                            nodesQ.ChangePriority((int)sinkNode.QueueIndex,
+                                        (int)startNode.Distance + (int)weight);
+                    }
+                    else
+                    {
+                        if (sinkNode.ReversedQueueIndex != null)
+                            nodesQ.ChangePriority((int)sinkNode.ReversedQueueIndex,
                                     (int)startNode.Distance + (int)weight);
+                    }
+                }
+                else
+                {
+                    sinkNode.Distance = startNode.Distance + weight;
+                    nodesQ.Enqueue(sinkNode);
+                }
             }
         }
 
@@ -116,7 +171,7 @@ namespace A3
             long distance = int.MaxValue;
             long best = -1;
             foreach (var nodeData in processedNodes.Concat(reverseProcessedNodes))
-            {   
+            {
                 var directNode = nodes[nodeData - 1];
                 var reverseNode = reversedNodes[nodeData - 1];
                 if (directNode.Distance + reverseNode.Distance < distance)
@@ -158,13 +213,5 @@ namespace A3
             return nodeConnections;
         }
 
-
-        //private static long[][] ReverseEdges(long[][] edges, long edgeCount)
-        //{
-        //    var reversedEdges = new long[edgeCount][];
-        //    for (int i = 0; i < edgeCount; i++)
-        //        reversedEdges[i] = new long[] { edges[i][1], edges[i][0], edges[i][2] };
-        //    return reversedEdges;
-        //}
     }
 }
