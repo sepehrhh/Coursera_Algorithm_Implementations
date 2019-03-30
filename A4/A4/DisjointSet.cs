@@ -59,12 +59,10 @@ namespace A4
             if (Rank[iParent] > Rank[jParent])
             {
                 Parent[jParent] = iParent;
-                //Cluster[jParent] = Cluster[iParent];
             }
             else
             {
                 Parent[iParent] = jParent;
-                //Cluster[iParent] = Cluster[jParent];
                 if (Rank[iParent] == Rank[jParent])
                     Rank[jParent]++;
             }
