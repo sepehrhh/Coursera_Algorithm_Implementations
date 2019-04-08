@@ -18,8 +18,8 @@ namespace A5
 
         public long[] Solve(string text, long n, string[] patterns)
         {
-            // write your code here            
-			throw new NotImplementedException();
+            //var suffixTree = new SuffixTree
+            return null;
         }
     }
 }

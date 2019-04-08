@@ -15,12 +15,12 @@ namespace A5
         }
 
         public override string Process(string inStr) =>
-        TestTools.Process(inStr, (Func<long, String[], String[]>) Solve);
+        TestTools.Process(inStr, (Func<long, String[], String[]>)Solve);
 
         public string[] Solve(long n, string[] patterns)
         {
-            // write your code here
-            throw new NotImplementedException();
+            return new Trie(patterns).VisualizedGraph.ToArray();
         }
+
     }
 }
