@@ -18,8 +18,8 @@ namespace A5
 
         public long[] Solve(string text, long n, string[] patterns)
         {
-            //var suffixTree = new SuffixTree
-            return null;
+            var trie = new Trie(patterns);
+            return trie.PatternMatching(text).ToArray();
         }
     }
 }
