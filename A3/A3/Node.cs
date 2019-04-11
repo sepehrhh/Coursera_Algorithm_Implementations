@@ -13,12 +13,13 @@ namespace A2
         public long Data { get; set; }
         public Nullable<long> QueueIndex { get; set; }
         public Nullable<long> ReversedQueueIndex { get; set; }
-        public bool ReverseMode { get; set; }
 
         public Node(long data, long dist)
         {
             Distance = dist;
             Data = data;
+            QueueIndex = null;
+            ReversedQueueIndex = null;
         }
 
         public Node(long data, long dist, Node prev)
@@ -26,6 +27,7 @@ namespace A2
             Distance = dist;
             Data = data;
             Prev = prev;
+            
         }
 
         public Node(int data)
