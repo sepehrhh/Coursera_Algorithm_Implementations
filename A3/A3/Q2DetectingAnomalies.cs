@@ -19,10 +19,14 @@ namespace A3
         public long Solve(long nodeCount, long[][] edges)
         {
             var nodes = new Node[nodeCount];
+            var nodeConnections = new Dictionary<long, List<(Node, long)>>();
             for (int i = 0; i < nodeCount; i++)
+            {
                 nodes[i] = new Node(i + 1, int.MaxValue);
+                nodeConnections.Add(i + 1, new List<(Node, long)>());
+            }
 
-            var graph = Q1MinCost.MakeGraph(nodeCount, nodes, edges);
+            var graph = Q1MinCost.MakeGraph(nodeCount, nodes, edges, nodeConnections);
             nodes[0].Distance = 0;
 
             for (int i = 0; i < nodeCount; i++)

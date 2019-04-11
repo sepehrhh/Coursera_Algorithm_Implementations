@@ -19,11 +19,15 @@ namespace A3
         public string[] Solve(long nodeCount, long[][] edges,long startNode)
         {
             var nodes = new Node[nodeCount];
+            var nodeConnections = new Dictionary<long, List<(Node, long)>>();
             for (int i = 0; i < nodeCount; i++)
+            {
                 nodes[i] = new Node(i + 1, int.MaxValue);
+                nodeConnections.Add(i + 1, new List<(Node, long)>());
+            }
 
             nodes[startNode - 1].Distance = 0;
-            var graph = Q1MinCost.MakeGraph(nodeCount, nodes, edges);
+            var graph = Q1MinCost.MakeGraph(nodeCount, nodes, edges, nodeConnections);
             var infinityCostNodes = new List<Node>();
             var result = new string[nodeCount];
 
