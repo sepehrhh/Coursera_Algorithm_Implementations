@@ -19,12 +19,16 @@ namespace A3
         public long Solve(long nodeCount, long[][] edges, long startNode, long endNode)
         {
             var nodes = new Node[nodeCount];
+            var nodeConnections = new Dictionary<long, List<(Node, long)>>();
             for (int i = 0; i < nodeCount; i++)
+            {
                 nodes[i] = new Node(i + 1, long.MaxValue);
+                nodeConnections.Add(i + 1, new List<(Node, long)>());
+            }
 
             nodes[startNode - 1].Distance = 0;
             var priorityQueue = new PriorityQueue((int)nodeCount, nodes);
-            var graph = MakeGraph(nodeCount, nodes, edges);
+            var graph = MakeGraph(nodeCount, nodes, edges, nodeConnections);
 
             if (graph[startNode].Count == 0)
                 return -1;
@@ -44,16 +48,11 @@ namespace A3
             return nodes[(int)endNode - 1].Distance != long.MaxValue ? nodes[(int)endNode - 1].Distance : -1;
         }
 
-        public static Dictionary<long, List<(Node, long)>> MakeGraph(long nodeCount, Node[] nodes, long[][] edges)
+        public static Dictionary<long, List<(Node, long)>> MakeGraph(long nodeCount, Node[] nodes, long[][] edges,
+            Dictionary<long, List<(Node, long)>> nodeConnections)
         {
-            var nodeConnections = new Dictionary<long, List<(Node, long)>>();
-            for (int i = 1; i <= nodeCount; i++)
-            {
-                nodeConnections.Add(i, new List<(Node, long)>());
-                foreach (var edge in edges)
-                    if (edge[0] == i)
-                        nodeConnections[i].Add((nodes[edge[1] - 1], edge[2]));
-            }
+            foreach (var edge in edges)
+                nodeConnections[edge[0]].Add((nodes[edge[1] - 1], edge[2]));
             return nodeConnections;
         }
     }
