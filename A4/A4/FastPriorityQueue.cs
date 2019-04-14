@@ -13,7 +13,6 @@ namespace A3
         public int MaxSize { get; }
         public int Size { get { return Queue.Count; } }
         public int LastIndex { get { return Size - 1; } }
-        private bool ReverseMode { get; set; }
         
 
         public FastPriorityQueue(int maxSize)
@@ -22,16 +21,12 @@ namespace A3
             Queue = new List<Node>(MaxSize);
         }
 
-        public void Enqueue(Node node, bool mode)
+        public void Enqueue(Node node)
         {
-            ReverseMode = mode;
             if (Queue.Capacity == Queue.Count)
                 throw new Exception("ERROR");
             Queue.Add(node);
-            if (!ReverseMode)
-                node.QueueIndex = LastIndex;
-            else
-                node.ReversedQueueIndex = LastIndex;
+            node.QueueIndex = LastIndex;
             SiftUp(LastIndex);
         }
 
@@ -45,20 +40,10 @@ namespace A3
         {
             while (i > 0 && Queue[Parent(i)].FScore >= Queue[i].FScore)
             {
-                if (!ReverseMode)
-                {
-                    Queue[i].QueueIndex = Parent(i);
-                    Queue[Parent(i)].QueueIndex = i;
-                }
-                else
-                {
-                    Queue[i].ReversedQueueIndex = Parent(i);
-                    Queue[Parent(i)].ReversedQueueIndex = i;
-                }
-                (Queue[i], Queue[Parent(i)]) =
-                    (Queue[Parent(i)], Queue[i]);
+                Queue[i].QueueIndex = Parent(i);
+                Queue[Parent(i)].QueueIndex = i;
+                (Queue[i], Queue[Parent(i)]) = (Queue[Parent(i)], Queue[i]);
                 i = Parent(i);
-
             }
         }
 
@@ -73,42 +58,23 @@ namespace A3
                 maxIndex = r;
             if (i != maxIndex)
             {
-                (Queue[i], Queue[maxIndex]) =
-                    (Queue[maxIndex], Queue[i]);
-                if (!ReverseMode)
-                {
-                    Queue[i].QueueIndex = i;
-                    Queue[maxIndex].QueueIndex = maxIndex;
-                }
-                else
-                {
-                    Queue[i].ReversedQueueIndex = i;
-                    Queue[maxIndex].ReversedQueueIndex = maxIndex;
-                }
+                (Queue[i], Queue[maxIndex]) = (Queue[maxIndex], Queue[i]);
+                Queue[i].QueueIndex = i;
+                Queue[maxIndex].QueueIndex = maxIndex;
                 SiftDown(maxIndex);
             }
             else
-            {
-                if (!ReverseMode)
-                    Queue[i].QueueIndex = i;
-                else
-                    Queue[i].ReversedQueueIndex = i;
-            }
+                Queue[i].QueueIndex = i;
         }
 
 
-        public Node ExtractPeek(bool mode)
+        public Node ExtractPeek()
         {
-            ReverseMode = mode;
             var result = Queue[0];
             Queue[0] = Queue[LastIndex];
-
             SiftDown(0);
             Queue.RemoveAt(LastIndex);
-            if (!ReverseMode)
-                result.QueueIndex = null;
-            else
-                result.ReversedQueueIndex = null;
+            result.QueueIndex = null;
             return result;
         }
 
@@ -120,9 +86,8 @@ namespace A3
         }
 
 
-        public void ChangePriority(int i, double newPriority, bool mode)
+        public void ChangePriority(int i, double newPriority)
         {
-            ReverseMode = mode;
             var oldPriority = Queue[i].FScore;
             Queue[i].FScore = newPriority;
             if (newPriority < oldPriority)
