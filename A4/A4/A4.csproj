@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DisjointSet.cs" />
+    <Compile Include="FastPriorityQueue.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="PriorityQueue.cs" />
     <Compile Include="Program.cs" />

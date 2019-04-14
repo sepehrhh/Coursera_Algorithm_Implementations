@@ -8,28 +8,20 @@ namespace A2
 {
     public class Node
     {
+        public Node Prev { get; set; }
         public long Distance { get; set; }
         public long Data { get; set; }
+        public Nullable<long> QueueIndex { get; set; }
         public long[] Coordinates { get; }
-        public long FScore { get; set; } //F is the total cost of the node.
-        public long GScore { get; set; } //G is the distance between the current node and the start node.
-        public long HScore { get; set; } //H is the heuristic — estimated distance from the current node to the end node.
-
-        public Node(long data, long dist)
-        {
-            Distance = dist;
-            Data = data;
-        }
-
-        public Node(int data)
-        {
-            Data = data;
-        }
+        public double FScore { get; set; } //F is the total cost of the node.
+        public double GScore { get; set; } //G is the distance between the current node and the start node.
+        public double HScore { get; set; } //H is the heuristic — estimated distance from the current node to the end node.
 
         public Node(long data, long[] coordinates)
         {
             Data = data;
             Coordinates = coordinates;
+            QueueIndex = null;
         }
     }
 }

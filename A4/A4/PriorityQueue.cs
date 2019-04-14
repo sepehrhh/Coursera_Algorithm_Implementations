@@ -38,7 +38,7 @@ namespace A2
 
         public void SiftUp(int i)
         {
-            while (i > 0 && MinHeap[Parent(i)].Distance > MinHeap[i].Distance)
+            while (i > 0 && MinHeap[Parent(i)].FScore > MinHeap[i].FScore)
             {
                 (MinHeap[i], MinHeap[Parent(i)]) =
                     (MinHeap[Parent(i)], MinHeap[i]);
@@ -50,10 +50,10 @@ namespace A2
         {
             var maxIndex = i;
             var l = LeftChild(i);
-            if (l <= Size && MinHeap[l].Distance < MinHeap[maxIndex].Distance)
+            if (l <= Size && MinHeap[l].FScore < MinHeap[maxIndex].FScore)
                 maxIndex = l;
             var r = RightChild(i);
-            if (r <= Size && MinHeap[r].Distance < MinHeap[maxIndex].Distance)
+            if (r <= Size && MinHeap[r].FScore < MinHeap[maxIndex].FScore)
                 maxIndex = r;
             if (i != maxIndex)
             {
@@ -74,15 +74,15 @@ namespace A2
 
         public void Remove(int i)
         {
-            MinHeap[i].Distance = long.MaxValue;
+            MinHeap[i].FScore = long.MaxValue;
             SiftUp(i);
             ExtractMin();
         }
 
         public void ChangePriority(int i, int priority)
         {
-            var oldPriority = MinHeap[i].Distance;
-            MinHeap[i].Distance = priority;
+            var oldPriority = MinHeap[i].FScore;
+            MinHeap[i].FScore = priority;
             if (priority < oldPriority)
                 SiftUp(i);
             else
