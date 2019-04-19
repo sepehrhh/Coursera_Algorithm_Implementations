@@ -18,8 +18,21 @@ namespace A6
 
         public long[] Solve(string text)
         {
-            // write your code here
-            throw new NotImplementedException();
+            return ConstructSuffixArray(text);
+        }
+
+        private long[] ConstructSuffixArray(string text)
+        {
+            var suffixArray = new string[text.Length];
+            var suffixIndexArray = new long[text.Length];
+            for (int i = 0; i < text.Length; i++)
+            {
+                var suffix = text.Substring(i);
+                suffixArray[i] = suffix;
+                suffixIndexArray[i] = i;
+            }
+            Array.Sort(suffixArray, suffixIndexArray);
+            return suffixIndexArray;
         }
     }
 }

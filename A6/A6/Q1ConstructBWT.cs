@@ -18,8 +18,24 @@ namespace A6
 
         public string Solve(string text)
         {
-            // write your code here
-            throw new NotImplementedException();
+            return BWT(text);
+        }
+
+        private string BWT(string text)
+        {
+            var strList = new List<string> { text };
+            for (int i = 0; i < text.Length - 1; i++)
+            {
+                string newStr = text.Last() + text.Substring(0, text.Length - 1);
+                strList.Add(newStr);
+                text = newStr;
+            }
+            strList.Sort();
+            var resultStr = String.Empty;
+            foreach (var str in strList)
+                resultStr += str.Last();
+
+            return resultStr;
         }
     }
 }
