@@ -11,7 +11,7 @@ namespace Exam1
         {
             this.ExcludeTestCaseRangeInclusive(24, 37);
             Vocab =
-             File.ReadAllLines("D:/git/AD97982/Exam1/Exam1Tests/TestData/TD2/dictionary.txt");
+             File.ReadAllLines("../../../Exam1Tests/TestData/TD2/dictionary.txt");
         }
 
         public override string Process(string inStr) => Solve(inStr);
