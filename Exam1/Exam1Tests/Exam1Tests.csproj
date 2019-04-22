@@ -58,7 +58,6 @@
   <ItemGroup>
     <Compile Include="EncryptionTests.cs" />
     <Compile Include="GradedTests.cs" />
-    <Compile Include="ProgramTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
