@@ -9,7 +9,7 @@ namespace Exam1
     {
         public Q2Cryptanalyst(string testDataName) : base(testDataName)
         {
-            this.ExcludeTestCaseRangeInclusive(24, 37);
+            this.ExcludeTestCaseRangeInclusive(23, 37);
             Vocab =
              File.ReadAllLines(@"Exam1_TestData\TD2\dictionary.txt");
         }
