@@ -26,7 +26,7 @@ namespace Exam1.Tests
                 );
         }
 
-        [TestMethod(), Timeout(1800)]
+        [TestMethod(), Timeout(2000)]
         [DeploymentItem("TestData", "Exam1_TestData")]
         public void SolveQ2CryptanalystTest()
         {
