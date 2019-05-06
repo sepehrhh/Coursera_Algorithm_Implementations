@@ -48,6 +48,7 @@
     <Compile Include="Q1FindAllOccur.cs" />
     <Compile Include="Q2CunstructSuffixArray.cs" />
     <Compile Include="Q3PatternMatchingSuffixArray.cs" />
+    <Compile Include="SuffixArray.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

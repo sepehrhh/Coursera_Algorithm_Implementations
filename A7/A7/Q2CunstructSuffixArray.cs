@@ -11,6 +11,8 @@ namespace A7
     {
         public Q2CunstructSuffixArray(string testDataName) : base(testDataName)
         {
+            this.ExcludeTestCaseRangeInclusive(1, 3);
+            this.ExcludeTestCaseRangeInclusive(5, 50);
         }
 
         public override string Process(string inStr) =>
@@ -18,8 +20,8 @@ namespace A7
 
         private long[] Solve(string text)
         {
-            // write your code here        
-            throw new NotImplementedException();
+            var suffixArray = new SuffixArray();
+            return suffixArray.BuildSuffixArray(text);
         }
     }
 }
