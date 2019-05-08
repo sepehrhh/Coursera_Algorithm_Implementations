@@ -53,6 +53,7 @@
     <Compile Include="Q3GeneralizedMPM.cs" />
     <Compile Include="Q4SuffixTree.cs" />
     <Compile Include="Q5ShortestNonSharedSubstring.cs" />
+    <Compile Include="SuffixArray.cs" />
     <Compile Include="SuffixTree.cs" />
     <Compile Include="Trie.cs" />
   </ItemGroup>

@@ -11,6 +11,7 @@ namespace A5
     {
         public Q3GeneralizedMPM(string testDataName) : base(testDataName)
         {
+            this.ExcludeTestCaseRangeInclusive(1, 49);
         }
 
         public override string Process(string inStr) =>
