@@ -13,7 +13,7 @@ namespace A8.Tests
     [TestClass()]
     public class GradedTests
     {
-        [TestMethod()/*, Timeout(20000)*/]
+        [TestMethod(), Timeout(2000)]
         public void SolveTest_Q1Evaquating()
         {
             RunTest(new Q1Evaquating("TD1"));
