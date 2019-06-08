@@ -60,6 +60,7 @@
     <Compile Include="Q1InferEnergyValues.cs" />
     <Compile Include="Q2OptimalDiet.cs" />
     <Compile Include="Q3OnlineAdAllocation.cs" />
+    <Compile Include="Simplex.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
